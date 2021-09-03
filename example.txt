@@ -1,0 +1,1 @@
+This is an example of text which is not too long, nor too short, but uses a lot of the same letters.

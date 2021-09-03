@@ -1,0 +1,140 @@
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
+
+// https://jsbin.com/tamuculebi/1/edit?js,console
+
+#define copyright_info\
+    "Copyright (c) Robin White.\n" \
+    "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n" \
+    "This is free software: you are free to change and redistribute it.\n" \
+    "There is NO WARRANTY, to the extent permitted by law.\n" \
+    "\nWritten by Robin White\n"
+
+static int handle_args(int argc, char* argv[])
+{
+    for(int i= 0; i<argc; i++) {
+	if (argv[i][0] == '-') {
+	    if (argv[i][1] == 'v') {
+		#ifdef build
+		printf("%s %s\n%s\nBuilt on: %s\nBuilt at: %s\n",
+		       target, version, copyright_info, build, time);
+		#endif
+		exit(0);
+	    }
+	    if (argv[i][1] == 'h') {
+		puts("Usage test [OPTION]... [FILE]...");
+		puts("Options:");
+		puts("  -h      display this information");
+		puts("  -v      display version information");
+		exit(0);
+	    }
+	}
+    }
+    return 0;
+}
+
+void print_status(int i, char* search_buffer, char current, char* ahead_buffer)
+{
+    printf("[%d]:%s[%c]%s\n", i, search_buffer, current, ahead_buffer);
+}
+
+/**
+ * o: offset:    number of positions backwards to find start of matching string
+ * l: length:    length of the match
+ * c: character: character found *after* the match
+ */
+typedef struct {
+    int o;
+    int l;
+    char c;
+} Triple;
+
+Triple* new_triple(int o, int l, char c)
+{
+    Triple* t = (Triple*)malloc(sizeof(Triple));
+    t->o = o;
+    t->l = l;
+    t->c = c;
+    return t;
+}
+
+void print_triple(Triple* t)
+{
+    printf("{%d, %d, %c}\n", t->o, t->l, t->c);
+}
+
+void slice(const char *str, char *result, size_t start, size_t end)
+{
+    strncpy(result, str + start, end - start);
+}
+
+int main(int argc, char** argv)
+{
+    handle_args(argc, argv);
+    
+    char* text = "ababcbababaabadbadacabcbdbacbacbd";
+    int length = strlen(text);
+
+    char search_buffer[length];
+    search_buffer[0] = '\0';
+
+    int new_length = 0;
+
+    for (int i=0; i<length; i++) {
+	print_status(i, search_buffer, text[i], text+i+1);
+	/* printf("buffer2: %s\n", search_buffer); */
+	Triple* t;
+	bool found = false;
+	int ahead_length = strlen(text+i) ;
+	for (int j=ahead_length; j>0; j--) {
+	    char value[j];
+	    strncpy(value, text+i, j);
+	    value[j] = '\0';
+	    char* result = strstr(search_buffer, value);
+	    // printf("%s in %s\n", value, search_buffer);
+	    /* if (result) { */
+	    /* 	int o = strlen(result); */
+	    /* 	int l  = strlen(value); */
+	    /* 	char c = text[i+l]; */
+	    /* 	t = new_triple(o, l, c); */
+            /*     char substr[l+1]; */
+	    /* 	slice(text, substr, i, i+l+1); */
+	    /* 	substr[l] = '\0'; */
+	    /* 	printf("found: %s\n", substr); */
+	    /* 	strcat(search_buffer, substr); */
+            /*     i+=l; */
+	    /* 	found = true; */
+	    /* 	break; */
+	    /* } */
+	}
+
+	strncat(search_buffer, text+i, 1);
+
+	/* if (!found) { */
+	/*     puts("not found"); */
+	/*     t = new_triple(0,0,text[i]); */
+
+	/*     char substr[2]; */
+	/*     slice(text, substr, i, i+1); */
+	/*     printf("was:    %s\n", search_buffer); */
+	/*     printf("substr: %s\n", substr); */
+
+	/*     strcat(search_buffer, substr); */
+	    
+	/*     printf("is:     %s\n", search_buffer); */
+	/* } */
+	// print_triple(t);
+	new_length++;
+
+	// printf("buffer1: %s\n", search_buffer);
+	// getchar();
+    }
+
+    printf("length was %dB\nnew length is %dB", length, new_length*3);
+    
+    return 0;
+}
